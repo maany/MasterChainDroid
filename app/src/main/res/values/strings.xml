@@ -6,4 +6,7 @@
     <string name="title_activity_sign_up">SignUpActivity</string>
     <string name="facebook_app_id">191029414572243</string>
     <string name="app_id">191029414572243</string>
+    <string name="title_activity_failed">FailedActivity</string>
+    <string name="title_activity_biometric_success">BiometricSuccess</string>
+    <string name="title_activity_selfie_scan">SelfieScan</string>
 </resources>

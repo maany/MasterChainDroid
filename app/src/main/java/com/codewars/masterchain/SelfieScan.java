@@ -11,11 +11,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import com.codewars.masterchain.retrofit.PictureUploadEndpoints;
+
 import com.codewars.masterchain.retrofit.TestRequests;
 import com.codewars.masterchain.retrofit.UploadImageAsyncTask;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -28,20 +26,20 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.mime.TypedFile;
 
-public class MasterChainLogin extends Activity {
+public class SelfieScan extends Activity {
+
+    private Button mFingerPrintScanButton;
+    private Button mSignUpActivityButton;
+    private EditText editText;
+    private String mCurrentPhotoPath;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_IMAGE_CAPTURE_LONG = 2;
     private static final String BIOMETRIC_SERVER_URL = "http://54.166.98.10:3000";
     private static final int FINGERPRINT_REQUEST_CODE =1;
-    private String mCurrentPhotoPath;
-    //private ImageView mImageView;
-    private Button mFingerPrintScanButton;
-    private Button mSignUpActivityButton;
-    private EditText editText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_master_chain_login);
+        setContentView(R.layout.activity_selfie_scan);
         mFingerPrintScanButton = (Button)findViewById(R.id.fingerPrintScanButton);
         mSignUpActivityButton = (Button)findViewById(R.id.signUpActivityButton);
         editText = (EditText)findViewById(R.id.editText);
@@ -50,7 +48,7 @@ public class MasterChainLogin extends Activity {
             @Override
             public boolean onLongClick(View v) {
                 dispatchTakePictureIntentLong();
-                return true;
+                return false;
             }
         });
         mFingerPrintScanButton.setOnClickListener(new View.OnClickListener() {
@@ -67,10 +65,11 @@ public class MasterChainLogin extends Activity {
         });
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_master_chain_login, menu);
+        getMenuInflater().inflate(R.menu.menu_selfie_scan, menu);
         return true;
     }
 
@@ -88,7 +87,6 @@ public class MasterChainLogin extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -109,7 +107,7 @@ public class MasterChainLogin extends Activity {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             //mImageView.setImageBitmap(imageBitmap);
-            //todo upload fingerprint to server via ASYNC TASK
+            //upload fingerprint to server via ASYNC TASK
             if(requestCode == FINGERPRINT_REQUEST_CODE){
                 File imageFile = null;
                 try {
@@ -117,7 +115,7 @@ public class MasterChainLogin extends Activity {
                     imageFile = createImageFile();
                     String userId = getUserId();
                     uploadFingerprintToServerAsync(imageFile, userId);
-                    Intent intent = new Intent(this, SelfieScan.class);
+                    Intent intent = new Intent(this, BiometricSuccess.class);
                     startActivity(intent);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -178,7 +176,7 @@ public class MasterChainLogin extends Activity {
         RestAdapter restAdapter = null;
         restAdapter = new RestAdapter.Builder().setLogLevel(RestAdapter.LogLevel.FULL).setEndpoint(API).build();
         TestRequests service = restAdapter.create(TestRequests.class);
-        service.getUser( new Callback<String>() {
+        service.getUser(new Callback<String>() {
             @Override
             public void success(String s, Response response) {
                 editText.setText("Success");
@@ -189,7 +187,7 @@ public class MasterChainLogin extends Activity {
                 editText.setText("Failure");
             }
         });
-    return "";
+        return "";
     }
     /**
      * Get User Id from fb
