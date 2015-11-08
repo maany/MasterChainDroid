@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import com.codewars.masterchain.retrofit.PictureUploadEndpoints;
 import com.codewars.masterchain.retrofit.TestRequests;
+import com.codewars.masterchain.retrofit.UploadImageAsyncTask;
 
 
 import java.io.File;
@@ -25,6 +26,7 @@ import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import retrofit.mime.TypedFile;
 
 public class MasterChainLogin extends Activity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -104,9 +106,10 @@ public class MasterChainLogin extends Activity {
             if(requestCode == FINGERPRINT_REQUEST_CODE){
                 File imageFile = null;
                 try {
+
                     imageFile = createImageFile();
-                String userId = getUserId();
-                uploadFingerprintToServer(imageFile, userId);
+                    String userId = getUserId();
+                    uploadFingerprintToServerAsync(imageFile, userId);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (Exception e){
@@ -134,11 +137,29 @@ public class MasterChainLogin extends Activity {
         return image;
     }
     private void uploadFingerprintToServer(File imageFile,String userId){
+        TypedFile typedFile = new TypedFile("multipart/form-data", imageFile);
+        String description = "userId";
+        String API = "http://54.166.98.10:3000";
+        RestAdapter restAdapter = null;
+        restAdapter = new RestAdapter.Builder().setLogLevel(RestAdapter.LogLevel.FULL).setEndpoint(API).build();
+        TestRequests service = restAdapter.create(TestRequests.class);
+        service.sendImage(typedFile ,description,new Callback<String>() {
+            @Override
+            public void success(String s, Response response) {
+                editText.setText("Success");
+            }
 
-
+            @Override
+            public void failure(RetrofitError error) {
+                editText.setText("Failure");
+            }
+        });
 
     }
-
+    private void uploadFingerprintToServerAsync(File imageFile,String userId){
+        UploadImageAsyncTask task = new UploadImageAsyncTask();
+        task.execute(imageFile);
+    }
     private String sentTestRetrofitRequest(){
         String API = "http://54.166.98.10:3000";
         RestAdapter restAdapter = null;
