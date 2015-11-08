@@ -1,7 +1,9 @@
 package com.codewars.masterchain.retrofit;
 
 import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
+import retrofit.Call;
 import retrofit.http.Body;
 import retrofit.http.GET;
 import retrofit.http.Multipart;
@@ -16,8 +18,8 @@ import retrofit.http.Query;
 public interface PictureUploadEndpoints {
 
     @Multipart
-    @POST("/user/fingerprint")
-    public void uploadImage(@Part("photo") RequestBody photo, @Part("description") String userId);
+    @POST("/signupfinger")
+    public Call<Response> uploadFingerPrint(@Part("image") RequestBody photo, @Part("userId") String userId);
 
 
 }

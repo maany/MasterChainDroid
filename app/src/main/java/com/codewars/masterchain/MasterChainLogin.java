@@ -1,5 +1,6 @@
 package com.codewars.masterchain;
-
+import com.codewars.masterchain.retrofit.TestRequests;
+import com.squareup.okhttp.Response;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,8 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
-
+import retrofit.Call;
 import com.codewars.masterchain.retrofit.PictureUploadEndpoints;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.RequestBody;
@@ -25,23 +27,40 @@ import retrofit.Retrofit;
 
 public class MasterChainLogin extends Activity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final String BIOMETRIC_SERVER_URL = "http://www.somepath.com";
+    private static final String BIOMETRIC_SERVER_URL = "http://54.166.98.10:3000";
     private static final int FINGERPRINT_REQUEST_CODE =1;
     String mCurrentPhotoPath;
     //private ImageView mImageView;
     private Button mFingerPrintScanButton;
-
+    private Button mSignUpActivityButton;
+    private EditText editText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_master_chain_login);
         mFingerPrintScanButton = (Button)findViewById(R.id.fingerPrintScanButton);
-
+        mSignUpActivityButton = (Button)findViewById(R.id.signUpActivityButton);
+        editText = (EditText)findViewById(R.id.editText);
+        editText.setText("sending test request");
+        try {
+            String name = sentTestRetrofitRequest();
+            editText.setText("sent test request");
+            editText.setText(name);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
         mFingerPrintScanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dispatchTakePictureIntent();
 
+            }
+        });
+        mSignUpActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent signUpIntent = new Intent(MasterChainLogin.this,SignUpActivity.class);
+                startActivity(signUpIntent);
             }
         });
     }
@@ -121,9 +140,18 @@ public class MasterChainLogin extends Activity {
                 .build();
         PictureUploadEndpoints uploadService = retrofit.create(PictureUploadEndpoints.class);
         RequestBody file = RequestBody.create(MediaType.parse("image/*"), imageFile.getAbsoluteFile());
-        uploadService.uploadImage(file,userId);
+        Call<Response> returnCode = uploadService.uploadFingerPrint(file,userId);
     }
 
+    private String sentTestRetrofitRequest(){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.github.com")
+                .build();
+        TestRequests testRequests = retrofit.create(TestRequests.class);
+        String name= "test";
+        testRequests.getUser(name);
+        return name;
+    }
     /**
      * Get User Id from fb
      * //todo
