@@ -1,6 +1,5 @@
 package com.codewars.masterchain;
-import com.codewars.masterchain.retrofit.TestRequests;
-import com.squareup.okhttp.Response;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,17 +12,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import retrofit.Call;
 import com.codewars.masterchain.retrofit.PictureUploadEndpoints;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.RequestBody;
+import com.codewars.masterchain.retrofit.TestRequests;
+
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import retrofit.Retrofit;
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class MasterChainLogin extends Activity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -44,7 +45,7 @@ public class MasterChainLogin extends Activity {
         editText.setText("sending test request");
         try {
             String name = sentTestRetrofitRequest();
-            editText.setText("sent test request");
+           // editText.setText("sent test request");
             editText.setText(name);
         }catch(Exception ex){
             ex.printStackTrace();
@@ -59,8 +60,6 @@ public class MasterChainLogin extends Activity {
         mSignUpActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent signUpIntent = new Intent(MasterChainLogin.this,SignUpActivity.class);
-                startActivity(signUpIntent);
             }
         });
     }
@@ -135,22 +134,28 @@ public class MasterChainLogin extends Activity {
         return image;
     }
     private void uploadFingerprintToServer(File imageFile,String userId){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BIOMETRIC_SERVER_URL)
-                .build();
-        PictureUploadEndpoints uploadService = retrofit.create(PictureUploadEndpoints.class);
-        RequestBody file = RequestBody.create(MediaType.parse("image/*"), imageFile.getAbsoluteFile());
-        Call<Response> returnCode = uploadService.uploadFingerPrint(file,userId);
+
+
+
     }
 
     private String sentTestRetrofitRequest(){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.github.com")
-                .build();
-        TestRequests testRequests = retrofit.create(TestRequests.class);
-        String name= "test";
-        testRequests.getUser(name);
-        return name;
+        String API = "http://54.166.98.10:3000";
+        RestAdapter restAdapter = null;
+        restAdapter = new RestAdapter.Builder().setLogLevel(RestAdapter.LogLevel.FULL).setEndpoint(API).build();
+        TestRequests service = restAdapter.create(TestRequests.class);
+        service.getUser( new Callback<String>() {
+            @Override
+            public void success(String s, Response response) {
+                editText.setText("Success");
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                editText.setText("Failure");
+            }
+        });
+    return "";
     }
     /**
      * Get User Id from fb
